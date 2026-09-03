@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Android 12+ (API 31+) punya Splash Screen API sendiri yang override
+         launch_background.xml versi lama. File ini memaksa background-nya
+         pakai warna primary yang sama, biar tidak balik putih lagi di
+         Android versi baru. -->
+    <style name="LaunchTheme" parent="@android:style/Theme.Black.NoTitleBar">
+        <item name="android:windowSplashScreenBackground">@color/splash_background</item>
+        <item name="android:windowSplashScreenAnimationDuration">200</item>
+        <item name="android:windowBackground">@drawable/launch_background</item>
+    </style>
+</resources>
