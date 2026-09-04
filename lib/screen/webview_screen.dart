@@ -29,12 +29,20 @@ class WebViewScreen extends StatefulWidget {
   /// mentah di dalam WebView.
   final bool Function(String url)? redirectHomeWhen;
 
+  /// Kalau false, AppBar (termasuk judulnya) tidak ditampilkan sama sekali
+  /// — WebView mengisi penuh layar, persis seperti tampilan login pertama
+  /// kali di main.dart. Default true (tampilkan AppBar seperti biasa),
+  /// supaya semua pemanggilan WebViewScreen yang sudah ada di modul-modul
+  /// lain tidak berubah.
+  final bool showAppBar;
+
   const WebViewScreen({
     super.key,
     required this.url,
     required this.title,
     this.closeOnUrlContains,
     this.redirectHomeWhen,
+    this.showAppBar = true,
   });
 
   @override
@@ -170,7 +178,7 @@ class _WebViewScreenState extends State<WebViewScreen> {
 
             // Otomatis tambahkan mobile_app=1
             // ke halaman Laravel yang belum memilikinya.
-            if (uri.host == '127.0.0.1') {
+            if (uri.host == Uri.parse(widget.url).host) {
               if (uri.queryParameters['mobile_app'] != '1') {
                 final newUri = uri.replace(
                   queryParameters: {
@@ -544,11 +552,15 @@ class _WebViewScreenState extends State<WebViewScreen> {
         }
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: Text(widget.title),
-          automaticallyImplyLeading: false,
-        ),
-        body: Stack(
+        appBar: widget.showAppBar
+            ? AppBar(
+                title: Text(widget.title),
+                automaticallyImplyLeading: false,
+              )
+            : null,
+        body: SafeArea(
+          top: !widget.showAppBar,
+          child: Stack(
           children: [
             WebViewWidget(
               controller: controller,
@@ -563,6 +575,7 @@ class _WebViewScreenState extends State<WebViewScreen> {
 
             if (hasError) _buildErrorView(),
           ],
+          ),
         ),
       ),
     );

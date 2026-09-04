@@ -209,6 +209,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       MaterialPageRoute(
         builder: (context) => WebViewScreen(
           title: 'Login',
+          // AppBar dimatikan supaya tampilannya persis sama seperti
+          // halaman login pertama kali (main.dart) — full screen tanpa
+          // judul "Login" di atas.
+          showAppBar: false,
           // Tambahkan timestamp unik (?_= ) supaya URL selalu berbeda
           // tiap kali logout, WebView jadi tidak mungkin serve halaman
           // ini dari cache (yang bisa bawa token CSRF basi -> 419).
