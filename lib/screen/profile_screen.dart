@@ -137,7 +137,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (!mounted) return;
       setState(() {
         _profile = data;
-        _loading = false;
+        _loading = false; 
       });
 
       final username = data['username'] as String? ?? '';

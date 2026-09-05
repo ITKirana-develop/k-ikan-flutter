@@ -24,7 +24,7 @@ class ItProfilingScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => const WebViewScreen(
                   title: 'Data User',
-                  url: 'http://127.0.0.1:8000//it/users?mobile_app=1',
+                  url: 'http://127.0.0.1:8000/it/users?mobile_app=1',
                 ),
               ),
             );
@@ -42,7 +42,7 @@ class ItProfilingScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => const WebViewScreen(
                   title: 'Device',
-                  url: 'http://127.0.0.1:8000//it/devices?mobile_app=1',
+                  url: 'http://127.0.0.1:8000/it/devices?mobile_app=1',
                 ),
               ),
             );
@@ -60,7 +60,7 @@ class ItProfilingScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => const WebViewScreen(
                   title: 'Penggunaan',
-                  url: 'http://127.0.0.1:8000//it/usage?mobile_app=1',
+                  url: 'http://127.0.0.1:8000/it/usage?mobile_app=1',
                 ),
               ),
             );
@@ -78,7 +78,7 @@ class ItProfilingScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => const WebViewScreen(
                   title: 'Perbaikan',
-                  url: 'http://127.0.0.1:8000//it/repairs?mobile_app=1',
+                  url: 'http://127.0.0.1:8000/it/repairs?mobile_app=1',
                 ),
               ),
             );
@@ -96,7 +96,7 @@ class ItProfilingScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => const WebViewScreen(
                   title: 'Fasilitas',
-                  url: 'http://127.0.0.1:8000//it/connections?mobile_app=1',
+                  url: 'http://127.0.0.1:8000/it/connections?mobile_app=1',
                 ),
               ),
             );
@@ -114,7 +114,7 @@ class ItProfilingScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => const WebViewScreen(
                   title: 'Manajemen Akun',
-                  url: 'http://127.0.0.1:8000//it/credentials?mobile_app=1',
+                  url: 'http://127.0.0.1:8000/it/credentials?mobile_app=1',
                 ),
               ),
             );
@@ -135,7 +135,7 @@ class ItProfilingScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => const WebViewScreen(
                   title: 'Zentyal Sync',
-                  url: 'http://127.0.0.1:8000//it/zentyal?mobile_app=1',
+                  url: 'http://127.0.0.1:8000/it/zentyal?mobile_app=1',
                 ),
               ),
             );
@@ -153,7 +153,7 @@ class ItProfilingScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => const WebViewScreen(
                   title: 'Samba Sync',
-                  url: 'http://127.0.0.1:8000//it/samba?mobile_app=1',
+                  url: 'http://127.0.0.1:8000/it/samba?mobile_app=1',
                 ),
               ),
             );
@@ -171,7 +171,7 @@ class ItProfilingScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => const WebViewScreen(
                   title: 'CUPS Sync',
-                  url: 'http://127.0.0.1:8000//it/cups?mobile_app=1',
+                  url: 'http://127.0.0.1:8000/it/cups?mobile_app=1',
                 ),
               ),
             );

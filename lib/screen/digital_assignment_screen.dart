@@ -29,7 +29,7 @@ class DigitalAssignmentScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => const WebViewScreen(
                   title: 'Surat Ijin Keluar',
-                  url: 'http://127.0.0.1:8000//da/leave-permits?mobile_app=1',
+                  url: 'http://127.0.0.1:8000/da/leave-permits?mobile_app=1',
                 ),
               ),
             );
@@ -47,7 +47,7 @@ class DigitalAssignmentScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => const WebViewScreen(
                   title: 'Surat Ijin Pulang',
-                  url: 'http://127.0.0.1:8000//da/home-permits?mobile_app=1',
+                  url: 'http://127.0.0.1:8000/da/home-permits?mobile_app=1',
                 ),
               ),
             );
@@ -65,7 +65,7 @@ class DigitalAssignmentScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => const WebViewScreen(
                   title: 'Customs Archive',
-                  url: 'http://127.0.0.1:8000//documents/requests?mobile_app=1',
+                  url: 'http://127.0.0.1:8000/documents/requests?mobile_app=1',
                 ),
               ),
             );
