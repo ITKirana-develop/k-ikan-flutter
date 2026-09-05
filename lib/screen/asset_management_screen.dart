@@ -24,7 +24,7 @@ class AssetManagementScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => const WebViewScreen(
                   title: 'Dashboard',
-                  url: 'http://127.0.0.1:8000/dashboard?mobile_app=1',
+                  url: 'https://office.mykfin.com/dashboard?mobile_app=1',
                 ),
               ),
             );
@@ -42,7 +42,7 @@ class AssetManagementScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => const WebViewScreen(
                   title: 'Data Aset',
-                  url: 'http://127.0.0.1:8000/assets?mobile_app=1',
+                  url: 'https://office.mykfin.com/assets?mobile_app=1',
                 ),
               ),
             );
@@ -60,7 +60,7 @@ class AssetManagementScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => const WebViewScreen(
                   title: 'Kategori Aset',
-                  url: 'http://127.0.0.1:8000/categories?mobile_app=1',
+                  url: 'https://office.mykfin.com/categories?mobile_app=1',
                 ),
               ),
             );
@@ -78,7 +78,7 @@ class AssetManagementScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => const WebViewScreen(
                   title: 'Data Lokasi',
-                  url: 'http://127.0.0.1:8000/locations?mobile_app=1',
+                  url: 'https://office.mykfin.com/locations?mobile_app=1',
                 ),
               ),
             );
@@ -96,7 +96,7 @@ class AssetManagementScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => const WebViewScreen(
                   title: 'Penggunaan Aset',
-                  url: 'http://127.0.0.1:8000/usage?mobile_app=1',
+                  url: 'https://office.mykfin.com/usage?mobile_app=1',
                 ),
               ),
             );
@@ -114,7 +114,7 @@ class AssetManagementScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => const WebViewScreen(
                   title: 'Perbaikan Aset',
-                  url: 'http://127.0.0.1:8000/repairs?mobile_app=1',
+                  url: 'https://office.mykfin.com/repairs?mobile_app=1',
                 ),
               ),
             );
@@ -132,7 +132,7 @@ class AssetManagementScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => const WebViewScreen(
                   title: 'Laporan Aset',
-                  url: 'http://127.0.0.1:8000/reports?mobile_app=1',
+                  url: 'https://office.mykfin.com/reports?mobile_app=1',
                 ),
               ),
             );

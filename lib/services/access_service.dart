@@ -86,7 +86,7 @@ class AccessService {
         // bisa bikin accessible_menus/can_access_master ketinggalan versi
         // lama walau server aslinya sudah balikin data terbaru.
         Uri.parse(
-          'http://127.0.0.1:8000/api/profile/me?_=${DateTime.now().millisecondsSinceEpoch}',
+          'https://office.mykfin.com/api/profile/me?_=${DateTime.now().millisecondsSinceEpoch}',
         ),
       );
       await pageLoaded.future.timeout(const Duration(seconds: 10));

@@ -24,7 +24,7 @@ class PaketLoggingScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => const WebViewScreen(
                   title: 'List Paket',
-                  url: 'http://127.0.0.1:8000/packages/my?mobile_app=1',
+                  url: 'https://office.mykfin.com/packages/my?mobile_app=1',
                 ),
               ),
             );
@@ -42,7 +42,7 @@ class PaketLoggingScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => const WebViewScreen(
                   title: 'Notifikasi Paket',
-                  url: 'http://127.0.0.1:8000/packages/my/notifications/all?mobile_app=1',
+                  url: 'https://office.mykfin.com/packages/my/notifications/all?mobile_app=1',
                 ),
               ),
             );
@@ -60,7 +60,7 @@ class PaketLoggingScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => const WebViewScreen(
                   title: 'Laporan Paket',
-                  url: 'http://127.0.0.1:8000/packages/reports?mobile_app=1',
+                  url: 'https://office.mykfin.com/packages/reports?mobile_app=1',
                 ),
               ),
             );

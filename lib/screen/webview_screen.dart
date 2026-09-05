@@ -59,9 +59,9 @@ class _WebViewScreenState extends State<WebViewScreen> {
   void initState() {
     super.initState();
 
-    // Minta izin kamera Android SEBELUM WebView dibuka,
-    // supaya saat halaman Laravel minta akses kamera (scan QR),
-    // sistem Android sudah mengizinkan.
+    // Minta izin kamera & lokasi Android SEBELUM WebView dibuka,
+    // supaya saat halaman Laravel minta akses kamera (scan QR) atau
+    // lokasi (cek checkpoint), sistem Android sudah mengizinkan.
     _requestCameraPermission();
 
     controller = WebViewController()
@@ -215,6 +215,21 @@ class _WebViewScreenState extends State<WebViewScreen> {
       // saat halaman web menyentuh <input type="file"> (dipakai field
       // "Foto Bukti" di Form Patroli & Lapor Darurat).
       platformController.setOnShowFileSelector(_handleFileSelector);
+
+      // Handler khusus Android: setujui otomatis permintaan lokasi (GPS)
+      // dari halaman web (dipakai fitur cek lokasi checkpoint di Form
+      // Patroli). Ini API terpisah dari setOnPlatformPermissionRequest
+      // di atas (yang hanya menangani kamera/mic) — tanpa handler ini,
+      // WebView Android akan SELALU menolak request geolocation dari
+      // JavaScript walaupun izin lokasi di Settings Android sudah Allow.
+      platformController.setGeolocationPermissionsPromptCallbacks(
+        onShowPrompt: (GeolocationPermissionsRequestParams request) async {
+          return const GeolocationPermissionsResponse(
+            allow: true,
+            retain: true,
+          );
+        },
+      );
     }
   }
 
@@ -267,6 +282,7 @@ class _WebViewScreenState extends State<WebViewScreen> {
   Future<void> _requestCameraPermission() async {
     if (Platform.isAndroid) {
       await Permission.camera.request();
+      await Permission.location.request();
     }
   }
 
