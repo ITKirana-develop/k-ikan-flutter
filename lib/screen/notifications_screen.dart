@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/access_service.dart';
 import 'home_screen.dart' show KColors;
 import 'webview_screen.dart';
 
@@ -8,9 +9,17 @@ import 'webview_screen.dart';
 /// - Dalam sebuah modul (mis. Kira Patrol): [moduleScope] diisi kode
 ///   modulnya -> cuma tampil notifikasi modul itu.
 ///
+/// Selain [moduleScope], tiap item JUGA difilter berdasarkan [menuKeys] —
+/// item cuma tampil kalau user yang login punya akses ke MINIMAL salah
+/// satu menu key di [menuKeys] (dicek lewat AccessService.hasAnyMenu,
+/// pola yang sama dengan filter card di HomeScreen). Tanpa ini, semua
+/// role (Security, Superadmin, dst) akan melihat notifikasi yang sama
+/// walau menu-nya sebenarnya dibatasi per role di web.
+///
 /// Nambah notifikasi modul baru (mis. Asset Management) tinggal tambah
-/// entri baru di [_items] dengan `module: 'asset_management'` — otomatis
-/// kefilter sendiri di kedua tempat tanpa ubah kode lain.
+/// entri baru di [_items] dengan `module: 'asset_management'` dan
+/// `menuKeys: [...]` sesuai key di accessible_menus — otomatis kefilter
+/// sendiri di kedua tempat tanpa ubah kode lain.
 class NotificationsScreen extends StatelessWidget {
   const NotificationsScreen({super.key, this.moduleScope});
 
@@ -19,6 +28,7 @@ class NotificationsScreen extends StatelessWidget {
   static const _items = <_NotifItemData>[
     _NotifItemData(
       module: 'kira_patrol',
+      menuKeys: ['patrol.emergency-reports.index'],
       icon: Icons.warning_rounded,
       iconColor: Color(0xFFD64550),
       title: 'Laporan Kondisi Darurat',
@@ -28,6 +38,7 @@ class NotificationsScreen extends StatelessWidget {
     ),
     _NotifItemData(
       module: 'kira_patrol',
+      menuKeys: ['patrol.sessions.approval'],
       icon: Icons.fact_check_rounded,
       iconColor: Color(0xFF0E7490),
       title: 'Approval Patroli',
@@ -37,6 +48,7 @@ class NotificationsScreen extends StatelessWidget {
     ),
     _NotifItemData(
       module: 'kira_patrol',
+      menuKeys: ['patrol.sessions.confirmation'],
       icon: Icons.verified_rounded,
       iconColor: Color(0xFF047857),
       title: 'Konfirmasi Patroli',
@@ -46,6 +58,7 @@ class NotificationsScreen extends StatelessWidget {
     ),
     _NotifItemData(
       module: 'paket_logging',
+      menuKeys: ['packages.requester.notifications', 'packages.security.index'],
       icon: Icons.local_shipping_rounded,
       iconColor: Color(0xFF17A883),
       title: 'Notifikasi Paket',
@@ -55,8 +68,9 @@ class NotificationsScreen extends StatelessWidget {
     ),
     // Modul lain (Asset Management, dst) tinggal tambah _NotifItemData
     // baru di sini dengan module: 'asset_management', dst.
-      _NotifItemData(
+    _NotifItemData(
       module: 'digital_assignment',
+      menuKeys: ['da.leave-permits.index'],
       icon: Icons.logout_rounded,
       iconColor: Color(0xFF3230C4),
       title: 'Surat Ijin Keluar',
@@ -66,6 +80,7 @@ class NotificationsScreen extends StatelessWidget {
     ),
     _NotifItemData(
       module: 'digital_assignment',
+      menuKeys: ['da.home-permits.index'],
       icon: Icons.login_rounded,
       iconColor: Color(0xFFD98324),
       title: 'Surat Ijin Pulang',
@@ -75,14 +90,16 @@ class NotificationsScreen extends StatelessWidget {
     ),
     // Modul lain (Asset Management, dst) tinggal tambah _NotifItemData
     // baru di sini dengan module: 'asset_management', dst.
-    ];
-
+  ];
 
   @override
   Widget build(BuildContext context) {
-    final items = moduleScope == null
-        ? _items
-        : _items.where((e) => e.module == moduleScope).toList();
+    final access = AccessService.instance;
+
+    final items = _items
+        .where((e) => moduleScope == null || e.module == moduleScope)
+        .where((e) => access.hasAnyMenu(e.menuKeys))
+        .toList();
 
     return Scaffold(
       backgroundColor: KColors.surface,
@@ -180,9 +197,9 @@ class NotificationsScreen extends StatelessWidget {
 
 
 class _NotifItemData {
-  
   const _NotifItemData({
     required this.module,
+    required this.menuKeys,
     required this.icon,
     required this.iconColor,
     required this.title,
@@ -192,6 +209,11 @@ class _NotifItemData {
   });
 
   final String module;
+
+  /// Daftar menu key (sama seperti di accessible_menus dari
+  /// /api/profile/me). Item ini tampil kalau user punya akses ke
+  /// MINIMAL salah satu key di list ini.
+  final List<String> menuKeys;
   final IconData icon;
   final Color iconColor;
   final String title;

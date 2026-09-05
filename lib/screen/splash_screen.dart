@@ -187,61 +187,40 @@ class _SplashScreenState extends State<SplashScreen>
                   ),
                 ),
               ),
-              Center(
-                child: AnimatedBuilder(
-                  animation: Listenable.merge([_controller, _pulseController]),
-                  builder: (context, child) {
-                    final pulse = 1.0 + (_pulseController.value * 0.10);
-                    return Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Opacity(
-                          opacity: _opacity.value,
-                          child: Transform.scale(
-                            scale: _scale.value,
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                // glow yang berdenyut pelan di belakang logo — dibikin lebih pekat
-                                // supaya logo lebih kontras dari background gradient
-                                Transform.scale(
-                                  scale: pulse,
-                                  child: Container(
-                                    width: 190,
-                                    height: 190,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: Colors.white.withValues(
-                                        alpha: 0.40 - (_pulseController.value * 0.14),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                Container(
-                                  width: 118,
-                                  height: 118,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: Colors.white.withValues(alpha: 0.18),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withValues(alpha: 0.20),
-                                        blurRadius: 26,
-                                        offset: const Offset(0, 12),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Image.asset(
-                                    widget.logoAsset,
-                                    width: 118,
-                                    height: 118,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        if (widget.appName != null) ...[
+      Center(
+  child: AnimatedBuilder(
+    animation: Listenable.merge([_controller, _pulseController]),
+    builder: (context, child) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Opacity(
+            opacity: _opacity.value,
+            child: Transform.scale(
+              scale: _scale.value,
+              child: Container(
+                width: 118,
+                height: 118,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.20),
+                      blurRadius: 26,
+                      offset: const Offset(0, 12),
+                    ),
+                  ],
+                ),
+                child: Image.asset(
+                  widget.logoAsset,
+                  width: 118,
+                  height: 118,
+                ),
+              ),
+            ),
+          ),
+          if (widget.appName != null) ...[             
                           const SizedBox(height: 24),
                           SlideTransition(
                             position: _nameSlide,
