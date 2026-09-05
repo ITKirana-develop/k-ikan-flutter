@@ -11,7 +11,7 @@ import 'home_screen.dart' show KColors;
 ///   home: SplashScreen(
 ///     nextScreenBuilder: (context) => const WebViewScreen(
 ///       title: 'Login',
-///       url: 'https://office.mykfin.com/login',
+///       url: 'http://127.0.0.1:8000//login',
 ///     ),
 ///   ),
 class SplashScreen extends StatefulWidget {

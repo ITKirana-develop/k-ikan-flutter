@@ -46,7 +46,7 @@ class MasterScreen extends StatelessWidget {
                           MaterialPageRoute(
                             builder: (context) => const WebViewScreen(
                               title: 'User Management',
-                              url: 'https://office.mykfin.com/users?mobile_app=1',
+                              url: 'http://127.0.0.1:8000//users?mobile_app=1',
                             ),
                           ),
                         );
@@ -63,7 +63,7 @@ class MasterScreen extends StatelessWidget {
                           MaterialPageRoute(
                             builder: (context) => const WebViewScreen(
                               title: 'Master Divisi',
-                              url: 'https://office.mykfin.com/divisions?mobile_app=1',
+                              url: 'http://127.0.0.1:8000//divisions?mobile_app=1',
                             ),
                           ),
                         );
@@ -80,7 +80,7 @@ class MasterScreen extends StatelessWidget {
                           MaterialPageRoute(
                             builder: (context) => const WebViewScreen(
                               title: 'Konfigurasi Penandatanganan',
-                              url: 'https://office.mykfin.com/documents/signers?mobile_app=1',
+                              url: 'http://127.0.0.1:8000//documents/signers?mobile_app=1',
                             ),
                           ),
                         );
@@ -97,7 +97,7 @@ class MasterScreen extends StatelessWidget {
                           MaterialPageRoute(
                             builder: (context) => const WebViewScreen(
                               title: 'Konfigurasi Stempel',
-                              url: 'https://office.mykfin.com/documents/stamp?mobile_app=1',
+                              url: 'http://127.0.0.1:8000//documents/stamp?mobile_app=1',
                             ),
                           ),
                         );

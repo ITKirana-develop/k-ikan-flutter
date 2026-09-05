@@ -24,7 +24,7 @@ class NotificationsScreen extends StatelessWidget {
       title: 'Laporan Kondisi Darurat',
       subtitle: 'Laporan insiden yang masih aktif',
       pageTitle: 'Laporan Darurat',
-      url: 'https://office.mykfin.com/patrol/emergency-reports?mobile_app=1',
+      url: 'http://127.0.0.1:8000//patrol/emergency-reports?mobile_app=1',
     ),
     _NotifItemData(
       module: 'kira_patrol',
@@ -33,7 +33,7 @@ class NotificationsScreen extends StatelessWidget {
       title: 'Approval Patroli',
       subtitle: 'Sesi patroli menunggu persetujuan Komandan',
       pageTitle: 'Approval Patroli',
-      url: 'https://office.mykfin.com/patrol/session/approval?mobile_app=1',
+      url: 'http://127.0.0.1:8000//patrol/session/approval?mobile_app=1',
     ),
     _NotifItemData(
       module: 'kira_patrol',
@@ -42,7 +42,7 @@ class NotificationsScreen extends StatelessWidget {
       title: 'Konfirmasi Patroli',
       subtitle: 'Sesi patroli menunggu konfirmasi akhir HRD',
       pageTitle: 'Konfirmasi Patroli',
-      url: 'https://office.mykfin.com/patrol/session/confirmation?mobile_app=1',
+      url: 'http://127.0.0.1:8000//patrol/session/confirmation?mobile_app=1',
     ),
     _NotifItemData(
       module: 'paket_logging',
@@ -51,7 +51,7 @@ class NotificationsScreen extends StatelessWidget {
       title: 'Notifikasi Paket',
       subtitle: 'Update status paket yang kamu ajukan',
       pageTitle: 'Notifikasi Paket',
-      url: 'https://office.mykfin.com/packages/my/notifications/all?mobile_app=1',
+      url: 'http://127.0.0.1:8000//packages/my/notifications/all?mobile_app=1',
     ),
     // Modul lain (Asset Management, dst) tinggal tambah _NotifItemData
     // baru di sini dengan module: 'asset_management', dst.
@@ -62,7 +62,7 @@ class NotificationsScreen extends StatelessWidget {
       title: 'Surat Ijin Keluar',
       subtitle: 'Surat ijin keluar menunggu approval',
       pageTitle: 'Surat Ijin Keluar',
-      url: 'https://office.mykfin.com/da/leave-permits?mobile_app=1',
+      url: 'http://127.0.0.1:8000//da/leave-permits?mobile_app=1',
     ),
     _NotifItemData(
       module: 'digital_assignment',
@@ -71,7 +71,7 @@ class NotificationsScreen extends StatelessWidget {
       title: 'Surat Ijin Pulang',
       subtitle: 'Surat ijin pulang menunggu approval',
       pageTitle: 'Surat Ijin Pulang',
-      url: 'https://office.mykfin.com/da/home-permits?mobile_app=1',
+      url: 'http://127.0.0.1:8000//da/home-permits?mobile_app=1',
     ),
     // Modul lain (Asset Management, dst) tinggal tambah _NotifItemData
     // baru di sini dengan module: 'asset_management', dst.

@@ -223,7 +223,7 @@ class _WebViewScreenState extends State<WebViewScreen> {
       // WebView Android akan SELALU menolak request geolocation dari
       // JavaScript walaupun izin lokasi di Settings Android sudah Allow.
       platformController.setGeolocationPermissionsPromptCallbacks(
-        onShowPrompt: (GeolocationPermissionsRequestParams request) async {
+        onShowPrompt:(GeolocationPermissionsRequestParams request) async {
           return const GeolocationPermissionsResponse(
             allow: true,
             retain: true,
