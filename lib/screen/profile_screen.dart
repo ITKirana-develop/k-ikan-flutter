@@ -116,7 +116,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
 
       await controller.loadRequest(
-        Uri.parse('http://127.0.0.1:8000//api/profile/me'),
+        Uri.parse('http://127.0.0.1:8000/api/profile/me'),
       );
 
       await pageLoaded.future.timeout(const Duration(seconds: 10));
@@ -217,7 +217,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           // tiap kali logout, WebView jadi tidak mungkin serve halaman
           // ini dari cache (yang bisa bawa token CSRF basi -> 419).
           url:
-              'http://127.0.0.1:8000//mobile-logout?_=${DateTime.now().millisecondsSinceEpoch}',
+              'http://127.0.0.1:8000/mobile-logout?_=${DateTime.now().millisecondsSinceEpoch}',
           // Abis user login ulang di sini dan Laravel redirect ke
           // dashboard/menu patrol, pindah ke HomeScreen Flutter (sama
           // seperti alur login pertama kali di main.dart), jangan

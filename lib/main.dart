@@ -14,7 +14,7 @@ class KiraPatrolApp extends StatefulWidget {
   State<KiraPatrolApp> createState() => _KiraPatrolAppState();
 }
 
-class _KiraPatrolAppState extends State<KiraPatrolApp> {
+class _KiraPatrolAppState extends State<KiraPatrolApp> { 
   late final WebViewController controller;
 
   final GlobalKey<NavigatorState> navigatorKey =
@@ -83,7 +83,7 @@ class _KiraPatrolAppState extends State<KiraPatrolApp> {
       )
       ..loadRequest(
         Uri.parse(
-          'http://127.0.0.1:8000//login?mobile_app=1',
+          'http://127.0.0.1:8000/login?mobile_app=1',
         ),
       );
   }

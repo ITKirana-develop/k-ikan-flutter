@@ -85,9 +85,9 @@ class AccessService {
         // BASI dari cache (pernah kejadian di alur logout -> 419), yang
         // bisa bikin accessible_menus/can_access_master ketinggalan versi
         // lama walau server aslinya sudah balikin data terbaru.
-        Uri.parse(
-          'https://office.mykfin.com/api/profile/me?_=${DateTime.now().millisecondsSinceEpoch}',
-        ),
+      Uri.parse(
+  'http://127.0.0.1:8000/api/profile/me?_=${DateTime.now().millisecondsSinceEpoch}',
+),
       );
       await pageLoaded.future.timeout(const Duration(seconds: 10));
 
