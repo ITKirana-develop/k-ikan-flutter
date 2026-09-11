@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'home_screen.dart' show KColors;
 import 'webview_screen.dart';
 import 'module_bottom_nav.dart';
+import '../config/app_config.dart';
 import '../services/access_service.dart';
 
 class PaketLoggingScreen extends StatelessWidget {
@@ -24,7 +25,7 @@ class PaketLoggingScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => const WebViewScreen(
                   title: 'List Paket',
-                  url: 'http://127.0.0.1:8000/packages/my?mobile_app=1',
+                  url: '${AppConfig.baseUrl}/packages/my?mobile_app=1',
                 ),
               ),
             );
@@ -42,7 +43,7 @@ class PaketLoggingScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => const WebViewScreen(
                   title: 'Notifikasi Paket',
-                  url: 'http://127.0.0.1:8000/packages/my/notifications/all?mobile_app=1',
+                  url: '${AppConfig.baseUrl}/packages/my/notifications/all?mobile_app=1',
                 ),
               ),
             );
@@ -60,7 +61,7 @@ class PaketLoggingScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => const WebViewScreen(
                   title: 'Laporan Paket',
-                  url: 'http://127.0.0.1:8000/packages/reports?mobile_app=1',
+                  url: '${AppConfig.baseUrl}/packages/reports?mobile_app=1',
                 ),
               ),
             );

@@ -572,6 +572,15 @@ class _WebViewScreenState extends State<WebViewScreen> {
             ? AppBar(
                 title: Text(widget.title),
                 automaticallyImplyLeading: false,
+                actions: [
+                  IconButton(
+                    icon: const Icon(Icons.refresh_rounded),
+                    tooltip: 'Refresh',
+                    onPressed: () {
+                      controller.reload();
+                    },
+                  ),
+                ],
               )
             : null,
         body: SafeArea(

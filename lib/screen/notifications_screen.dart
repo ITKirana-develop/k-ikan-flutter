@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/access_service.dart';
 import 'home_screen.dart' show KColors;
 import 'webview_screen.dart';
-
+import '../config/app_config.dart';
 /// Daftar notifikasi. Dipakai dari 2 tempat:
 /// - Menu Utama (Home): [moduleScope] = null -> tampil SEMUA notifikasi
 ///   dari semua modul.
@@ -34,7 +34,7 @@ class NotificationsScreen extends StatelessWidget {
       title: 'Laporan Kondisi Darurat',
       subtitle: 'Laporan insiden yang masih aktif',
       pageTitle: 'Laporan Darurat',
-      url: 'http://127.0.0.1:8000/patrol/emergency-reports?mobile_app=1',
+      url: '${AppConfig.baseUrl}/patrol/emergency-reports?mobile_app=1',
     ),
     _NotifItemData(
       module: 'kira_patrol',
@@ -44,7 +44,7 @@ class NotificationsScreen extends StatelessWidget {
       title: 'Approval Patroli',
       subtitle: 'Sesi patroli menunggu persetujuan Komandan',
       pageTitle: 'Approval Patroli',
-      url: 'http://127.0.0.1:8000/patrol/session/approval?mobile_app=1',
+      url: '${AppConfig.baseUrl}/patrol/session/approval?mobile_app=1',
     ),
     _NotifItemData(
       module: 'kira_patrol',
@@ -54,7 +54,7 @@ class NotificationsScreen extends StatelessWidget {
       title: 'Konfirmasi Patroli',
       subtitle: 'Sesi patroli menunggu konfirmasi akhir HRD',
       pageTitle: 'Konfirmasi Patroli',
-      url: 'http://127.0.0.1:8000/patrol/session/confirmation?mobile_app=1',
+      url: '${AppConfig.baseUrl}/patrol/session/confirmation?mobile_app=1',
     ),
     _NotifItemData(
       module: 'paket_logging',
@@ -64,7 +64,7 @@ class NotificationsScreen extends StatelessWidget {
       title: 'Notifikasi Paket',
       subtitle: 'Update status paket yang kamu ajukan',
       pageTitle: 'Notifikasi Paket',
-      url: 'http://127.0.0.1:8000/packages/my/notifications/all?mobile_app=1',
+      url: '${AppConfig.baseUrl}/packages/my/notifications/all?mobile_app=1',
     ),
     // Modul lain (Asset Management, dst) tinggal tambah _NotifItemData
     // baru di sini dengan module: 'asset_management', dst.
@@ -76,7 +76,7 @@ class NotificationsScreen extends StatelessWidget {
       title: 'Surat Ijin Keluar',
       subtitle: 'Surat ijin keluar menunggu approval',
       pageTitle: 'Surat Ijin Keluar',
-      url: 'http://127.0.0.1:8000/da/leave-permits?mobile_app=1',
+      url: '${AppConfig.baseUrl}/da/leave-permits?mobile_app=1',
     ),
     _NotifItemData(
       module: 'digital_assignment',
@@ -86,7 +86,7 @@ class NotificationsScreen extends StatelessWidget {
       title: 'Surat Ijin Pulang',
       subtitle: 'Surat ijin pulang menunggu approval',
       pageTitle: 'Surat Ijin Pulang',
-      url: 'http://127.0.0.1:8000/da/home-permits?mobile_app=1',
+      url: '${AppConfig.baseUrl}/da/home-permits?mobile_app=1',
     ),
     // Modul lain (Asset Management, dst) tinggal tambah _NotifItemData
     // baru di sini dengan module: 'asset_management', dst.

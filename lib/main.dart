@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'screen/home_screen.dart';
 import 'screen/splash_screen.dart';
+import 'config/app_config.dart';
 
 void main() {
   runApp(const KiraPatrolApp());
@@ -35,29 +36,28 @@ class _KiraPatrolAppState extends State<KiraPatrolApp> {
           },
 
           onPageFinished: (url) {
-            debugPrint('WEBVIEW FINISH: $url');
+  debugPrint('WEBVIEW FINISH: $url');
 
-            if (!_alreadyOpenedHome &&
-                (url.contains('/dashboard') ||
-                    url.contains('/patrol/menu'))) {
-              _alreadyOpenedHome = true;
+  if (!_alreadyOpenedHome &&
+      (url.contains('/dashboard') ||
+          url.contains('/patrol/menu'))) {
+    _alreadyOpenedHome = true;
 
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                if (!mounted) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
 
-                final navigator = navigatorKey.currentState;
+      final navigator = navigatorKey.currentState;
 
-                if (navigator != null) {
-                  navigator.pushReplacement(
-                    MaterialPageRoute(
-                      builder: (context) => const HomeScreen(),
-                    ),
-                  );
-                }
-              });
-            }
-          },
-
+      if (navigator != null) {
+        navigator.pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => const HomeScreen(),
+          ),
+        );
+      }
+    });
+  }
+},
           onWebResourceError: (error) {
             debugPrint(
               'WEBVIEW ERROR: ${error.errorCode}',
@@ -83,7 +83,7 @@ class _KiraPatrolAppState extends State<KiraPatrolApp> {
       )
       ..loadRequest(
         Uri.parse(
-          'http://127.0.0.1:8000/login?mobile_app=1',
+          '${AppConfig.baseUrl}/login?mobile_app=1',
         ),
       );
   }

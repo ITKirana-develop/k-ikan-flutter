@@ -1,7 +1,8 @@
+import '../config/app_config.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:webview_flutter/webview_flutter.dart';
-
+   
 /// Diambil sekali dari /api/profile/me lewat WebView tersembunyi (supaya
 /// otomatis ikut session cookie login yang sudah ada, sama seperti
 /// ProfileScreen), lalu di-cache di memori untuk seluruh sesi aplikasi.
@@ -86,7 +87,7 @@ class AccessService {
         // bisa bikin accessible_menus/can_access_master ketinggalan versi
         // lama walau server aslinya sudah balikin data terbaru.
       Uri.parse(
-  'http://127.0.0.1:8000/api/profile/me?_=${DateTime.now().millisecondsSinceEpoch}',
+  '${AppConfig.baseUrl}/api/profile/me?_=${DateTime.now().millisecondsSinceEpoch}',
 ),
       );
       await pageLoaded.future.timeout(const Duration(seconds: 10));

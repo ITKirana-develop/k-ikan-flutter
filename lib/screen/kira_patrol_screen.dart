@@ -3,6 +3,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'home_screen.dart' show KColors;
 import 'webview_screen.dart';
 import 'module_bottom_nav.dart';
+import '../config/app_config.dart';
 import '../services/access_service.dart';
 
 class KiraPatrolScreen extends StatelessWidget {
@@ -26,7 +27,7 @@ class KiraPatrolScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => const WebViewScreen(
                   title: 'Surat Ijin',
-                  url: 'http://127.0.0.1:8000/da/security?mobile_app=1',
+                  url: '${AppConfig.baseUrl}/da/security?mobile_app=1',
                 ),
               ),
             );
@@ -44,7 +45,7 @@ class KiraPatrolScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => const WebViewScreen(
                   title: 'Penerimaan Paket',
-                  url: 'http://127.0.0.1:8000/packages/security?mobile_app=1',
+                  url: '${AppConfig.baseUrl}/packages/security?mobile_app=1',
                 ),
               ),
             );
@@ -75,7 +76,7 @@ class KiraPatrolScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => const WebViewScreen(
                   title: 'Form Patrol',
-                  url: 'http://127.0.0.1:8000/patrol/session/start?mobile_app=1',
+                  url: '${AppConfig.baseUrl}/patrol/session/start?mobile_app=1',
                 ),
               ),
             );
@@ -93,7 +94,7 @@ class KiraPatrolScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => const WebViewScreen(
                   title: 'Master Checkpoint',
-                  url: 'http://127.0.0.1:8000/patrol/check-points?mobile_app=1',
+                  url: '${AppConfig.baseUrl}/patrol/check-points?mobile_app=1',
                 ),
               ),
             );
@@ -111,7 +112,7 @@ class KiraPatrolScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => const WebViewScreen(
                   title: 'Riwayat Patroli',
-                  url: 'http://127.0.0.1:8000/patrol?mobile_app=1',
+                  url: '${AppConfig.baseUrl}/patrol?mobile_app=1',
                 ),
               ),
             );
@@ -129,7 +130,7 @@ class KiraPatrolScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => const WebViewScreen(
                   title: 'Approval Patroli',
-                  url: 'http://127.0.0.1:8000/patrol/session/approval?mobile_app=1',
+                  url: '${AppConfig.baseUrl}/patrol/session/approval?mobile_app=1',
                 ),
               ),
             );
@@ -147,7 +148,7 @@ class KiraPatrolScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => const WebViewScreen(
                   title: 'Konfirmasi Patroli',
-                  url: 'http://127.0.0.1:8000/patrol/session/confirmation?mobile_app=1',
+                  url: '${AppConfig.baseUrl}/patrol/session/confirmation?mobile_app=1',
                 ),
               ),
             );
@@ -165,7 +166,7 @@ class KiraPatrolScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => const WebViewScreen(
                   title: 'Lapor Darurat',
-                  url: 'http://127.0.0.1:8000/patrol/emergency-reports/create?mobile_app=1',
+                  url: '${AppConfig.baseUrl}/patrol/emergency-reports/create?mobile_app=1',
                   closeOnUrlContains: '/patrol/menu',
                 ),
               ),
@@ -196,7 +197,7 @@ class KiraPatrolScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => const WebViewScreen(
                   title: 'Laporan Darurat',
-                  url: 'http://127.0.0.1:8000/patrol/emergency-reports?mobile_app=1',
+                  url: '${AppConfig.baseUrl}/patrol/emergency-reports?mobile_app=1',
                 ),
               ),
             );
@@ -218,7 +219,7 @@ class KiraPatrolScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => const WebViewScreen(
                   title: 'Serah Terima',
-                  url: 'http://127.0.0.1:8000/patrol/handovers/create?mobile_app=1',
+                  url: '${AppConfig.baseUrl}/patrol/handovers/create?mobile_app=1',
                 ),
               ),
             );
@@ -236,7 +237,7 @@ class KiraPatrolScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => const WebViewScreen(
                   title: 'Laporan Serah Terima',
-                  url: 'http://127.0.0.1:8000/patrol/handover-reports?mobile_app=1',
+                  url: '${AppConfig.baseUrl}/patrol/handover-reports?mobile_app=1',
                 ),
               ),
             );

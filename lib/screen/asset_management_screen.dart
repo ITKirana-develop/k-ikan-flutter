@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'home_screen.dart' show KColors;
 import 'webview_screen.dart';
 import 'module_bottom_nav.dart';
+import '../config/app_config.dart';
 import '../services/access_service.dart';
 
 class AssetManagementScreen extends StatelessWidget {
@@ -24,7 +25,7 @@ class AssetManagementScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => const WebViewScreen(
                   title: 'Dashboard',
-                  url: 'http://127.0.0.1:8000/dashboard?mobile_app=1',
+                  url: '${AppConfig.baseUrl}/dashboard?mobile_app=1',
                 ),
               ),
             );
@@ -42,7 +43,7 @@ class AssetManagementScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => const WebViewScreen(
                   title: 'Data Aset',
-                  url: 'http://127.0.0.1:8000/assets?mobile_app=1',
+                  url: '${AppConfig.baseUrl}/assets?mobile_app=1',
                 ),
               ),
             );
@@ -60,7 +61,7 @@ class AssetManagementScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => const WebViewScreen(
                   title: 'Kategori Aset',
-                  url: 'http://127.0.0.1:8000/categories?mobile_app=1',
+                  url: '${AppConfig.baseUrl}/categories?mobile_app=1',
                 ),
               ),
             );
@@ -78,7 +79,7 @@ class AssetManagementScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => const WebViewScreen(
                   title: 'Data Lokasi',
-                  url: 'http://127.0.0.1:8000/locations?mobile_app=1',
+                  url: '${AppConfig.baseUrl}/locations?mobile_app=1',
                 ),
               ),
             );
@@ -96,7 +97,7 @@ class AssetManagementScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => const WebViewScreen(
                   title: 'Penggunaan Aset',
-                  url: 'http://127.0.0.1:8000/usage?mobile_app=1',
+                  url: '${AppConfig.baseUrl}/usage?mobile_app=1',
                 ),
               ),
             );
@@ -114,7 +115,7 @@ class AssetManagementScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => const WebViewScreen(
                   title: 'Perbaikan Aset',
-                  url: 'http://127.0.0.1:8000/repairs?mobile_app=1',
+                  url: '${AppConfig.baseUrl}/repairs?mobile_app=1',
                 ),
               ),
             );
@@ -132,7 +133,7 @@ class AssetManagementScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => const WebViewScreen(
                   title: 'Laporan Aset',
-                  url: 'http://127.0.0.1:8000/reports?mobile_app=1',
+                  url: '${AppConfig.baseUrl}/reports?mobile_app=1',
                 ),
               ),
             );

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'home_screen.dart' show KColors;
 import 'webview_screen.dart';
 import 'module_bottom_nav.dart';
+import '../config/app_config.dart';
 import '../services/access_service.dart';
 
 class DigitalAssignmentScreen extends StatelessWidget {
@@ -29,7 +30,7 @@ class DigitalAssignmentScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => const WebViewScreen(
                   title: 'Surat Ijin Keluar',
-                  url: 'http://127.0.0.1:8000/da/leave-permits?mobile_app=1',
+                  url: '${AppConfig.baseUrl}/da/leave-permits?mobile_app=1',
                 ),
               ),
             );
@@ -47,7 +48,7 @@ class DigitalAssignmentScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => const WebViewScreen(
                   title: 'Surat Ijin Pulang',
-                  url: 'http://127.0.0.1:8000/da/home-permits?mobile_app=1',
+                  url: '${AppConfig.baseUrl}/da/home-permits?mobile_app=1',
                 ),
               ),
             );
@@ -65,7 +66,7 @@ class DigitalAssignmentScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => const WebViewScreen(
                   title: 'Customs Archive',
-                  url: 'http://127.0.0.1:8000/documents/requests?mobile_app=1',
+                  url: '${AppConfig.baseUrl}/documents/requests?mobile_app=1',
                 ),
               ),
             );
