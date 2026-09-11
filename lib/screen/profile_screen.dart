@@ -9,7 +9,9 @@ import 'home_screen.dart' show KColors;
 import 'webview_screen.dart';
 import '../services/profile_avatar_service.dart';
 import '../services/access_service.dart';
+import '../services/vpn_service.dart';
 import '../config/app_config.dart';
+
 /// Halaman Profile — sama untuk semua modul (Menu Utama, Kira Patrol,
 /// dan modul lain nantinya). Data user diambil dari database Laravel
 /// lewat API kecil (/api/profile/me), memakai WebView tersembunyi
@@ -28,16 +30,57 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _loading = true;
   bool _loggingOut = false;
 
+  VpnConnectionState _vpnState = VpnConnectionState.disconnected;
+  StreamSubscription<VpnConnectionState>? _vpnSub;
+
   @override
   void initState() {
     super.initState();
     _fetchProfile();
     ProfileAvatarService.instance.addListener(_onAvatarChanged);
+    _initVpnStatus();
+  }
+
+  Future<void> _initVpnStatus() async {
+    // Cek status sekarang dulu (biar posisi toggle langsung benar begitu
+    // halaman dibuka, tidak nunggu event stream pertama).
+    try {
+      final connected = await VpnService.instance.isConnectedNow();
+      if (mounted) {
+        setState(() {
+          _vpnState = connected
+              ? VpnConnectionState.connected
+              : VpnConnectionState.disconnected;
+        });
+      }
+    } catch (_) {
+      // Biarkan default disconnected kalau gagal cek.
+    }
+
+    _vpnSub = VpnService.instance.stateStream.listen((state) {
+      if (mounted) setState(() => _vpnState = state);
+    });
+  }
+
+  Future<void> _onVpnToggle(bool wantConnected) async {
+    try {
+      if (wantConnected) {
+        await VpnService.instance.connect();
+      } else {
+        await VpnService.instance.disconnect();
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('VPN gagal: $e')));
+    }
   }
 
   @override
   void dispose() {
     ProfileAvatarService.instance.removeListener(_onAvatarChanged);
+    _vpnSub?.cancel();
     super.dispose();
   }
 
@@ -137,7 +180,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (!mounted) return;
       setState(() {
         _profile = data;
-        _loading = false; 
+        _loading = false;
       });
 
       final username = data['username'] as String? ?? '';
@@ -289,16 +332,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: _loading
             ? const Center(child: CircularProgressIndicator())
             : _error != null
-                ? _ErrorState(message: _error!, onRetry: _fetchProfile)
-                : _ProfileContent(
-                    profile: _profile!,
-                    initials: _initials(_profile!['full_name'] as String?),
-                    roleLabel: _roleLabel(_profile!['role'] as String?),
-                    loggingOut: _loggingOut,
-                    onLogout: _confirmLogout,
-                    photoFile: ProfileAvatarService.instance.photoFile,
-                    onEditPhoto: _pickPhoto,
-                  ),
+            ? _ErrorState(message: _error!, onRetry: _fetchProfile)
+            : _ProfileContent(
+                profile: _profile!,
+                initials: _initials(_profile!['full_name'] as String?),
+                roleLabel: _roleLabel(_profile!['role'] as String?),
+                loggingOut: _loggingOut,
+                onLogout: _confirmLogout,
+                photoFile: ProfileAvatarService.instance.photoFile,
+                onEditPhoto: _pickPhoto,
+                vpnState: _vpnState,
+                onVpnToggle: _onVpnToggle,
+              ),
       ),
     );
   }
@@ -325,8 +370,11 @@ class _ErrorState extends StatelessWidget {
                 color: KColors.onSurfaceVariant.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.error_outline_rounded,
-                  size: 28, color: KColors.onSurfaceVariant),
+              child: Icon(
+                Icons.error_outline_rounded,
+                size: 28,
+                color: KColors.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: 14),
             Text(
@@ -346,8 +394,10 @@ class _ErrorState extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 12,
+                ),
               ),
             ),
           ],
@@ -366,6 +416,8 @@ class _ProfileContent extends StatelessWidget {
     required this.onLogout,
     required this.photoFile,
     required this.onEditPhoto,
+    required this.vpnState,
+    required this.onVpnToggle,
   });
 
   final Map<String, dynamic> profile;
@@ -375,6 +427,8 @@ class _ProfileContent extends StatelessWidget {
   final VoidCallback onLogout;
   final File? photoFile;
   final VoidCallback onEditPhoto;
+  final VpnConnectionState vpnState;
+  final ValueChanged<bool> onVpnToggle;
 
   String _valueOr(dynamic v) {
     if (v == null) return '-';
@@ -408,8 +462,9 @@ class _ProfileContent extends StatelessWidget {
                     child: CircleAvatar(
                       radius: 44,
                       backgroundColor: KColors.primary,
-                      backgroundImage:
-                          photoFile != null ? FileImage(photoFile!) : null,
+                      backgroundImage: photoFile != null
+                          ? FileImage(photoFile!)
+                          : null,
                       child: photoFile == null
                           ? Text(
                               initials,
@@ -459,8 +514,10 @@ class _ProfileContent extends StatelessWidget {
               ),
               const SizedBox(height: 6),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: KColors.primaryFixed,
                   borderRadius: BorderRadius.circular(999),
@@ -499,6 +556,8 @@ class _ProfileContent extends StatelessWidget {
           label: 'Department',
           value: _valueOr(profile['department']),
         ),
+        const SizedBox(height: 12),
+        _VpnTile(state: vpnState, onToggle: onVpnToggle),
         const SizedBox(height: 28),
         SizedBox(
           width: double.infinity,
@@ -600,6 +659,115 @@ class _InfoTile extends StatelessWidget {
                 ),
               ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _VpnTile extends StatelessWidget {
+  const _VpnTile({required this.state, required this.onToggle});
+
+  final VpnConnectionState state;
+  final ValueChanged<bool> onToggle;
+
+  bool get _isOn =>
+      state == VpnConnectionState.connected ||
+      state == VpnConnectionState.connecting;
+
+  String get _statusLabel {
+    switch (state) {
+      case VpnConnectionState.connected:
+        return 'Terhubung';
+      case VpnConnectionState.connecting:
+        return 'Menghubungkan...';
+      case VpnConnectionState.error:
+        return 'Gagal terhubung';
+      case VpnConnectionState.disconnected:
+        return 'Terputus';
+    }
+  }
+
+  Color _statusColor() {
+    switch (state) {
+      case VpnConnectionState.connected:
+        return const Color(0xFF16A34A); // hijau
+      case VpnConnectionState.connecting:
+        return KColors.primary;
+      case VpnConnectionState.error:
+        return const Color(0xFFBA1A1A); // merah
+      case VpnConnectionState.disconnected:
+        return KColors.onSurfaceVariant;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: KColors.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: KColors.outlineVariant.withValues(alpha: 0.3),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: KColors.onSurface.withValues(alpha: 0.04),
+            blurRadius: 20,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: KColors.primaryFixed.withValues(alpha: 0.4),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              Icons.vpn_lock_rounded,
+              size: 20,
+              color: KColors.primary,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'VPN KANTOR',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: KColors.onSurfaceVariant,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  _statusLabel,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: _statusColor(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Waktu status "connecting", tombolnya di-nonaktifkan sesaat
+          // supaya user tidak nge-tap berkali-kali sambil proses jalan.
+          Switch(
+            value: _isOn,
+            onChanged: state == VpnConnectionState.connecting ? null : onToggle,
+            activeThumbColor: KColors.primary,
           ),
         ],
       ),

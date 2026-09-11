@@ -43,6 +43,8 @@ dependencies:
   open_filex: ^4.5.0
   image_picker: ^1.1.2
   url_launcher: ^6.3.0
+  shared_preferences: ^2.3.0
+  wireguard_flutter_pro: ^0.1.2
 
 dev_dependencies:
   flutter_test:
