@@ -154,7 +154,7 @@ class _VpnGateScreenState extends State<VpnGateScreen> {
               const Icon(Icons.vpn_lock_rounded, color: Colors.white, size: 56),
               const SizedBox(height: 20),
               const Text(
-                'Sambungkan VPN Kantor',
+                'Sambungkan VPN KFI',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 20,
@@ -257,7 +257,7 @@ class _LoginGatewayScreenState extends State<LoginGatewayScreen> {
             debugPrint('WEBVIEW START: $url');
           },
 
-          onPageFinished: (url) {
+         onPageFinished: (url) {
   debugPrint('WEBVIEW FINISH: $url');
 
   final isLoginPage = url.contains('/login');

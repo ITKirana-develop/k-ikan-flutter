@@ -742,7 +742,7 @@ class _VpnTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'VPN KANTOR',
+                  'VPN KFI',
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'home_screen.dart' show KColors;
 import '../services/vpn_service.dart';
 import '../services/vpn_config_service.dart';
@@ -120,7 +121,7 @@ class _VpnMenuScreenState extends State<VpnMenuScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('VPN Kantor'),
+        title: const Text('VPN KFI'),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings_rounded),
@@ -161,7 +162,7 @@ class _VpnMenuScreenState extends State<VpnMenuScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'VPN Kantor',
+                        'VPN KFI',
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
@@ -260,14 +261,10 @@ class _VpnSettingsSheetState extends State<_VpnSettingsSheet> {
   final _formKey = GlobalKey<FormState>();
   final _privateKeyCtrl = TextEditingController();
   final _addressCtrl = TextEditingController();
-  final _publicKeyCtrl = TextEditingController();
-  final _endpointCtrl = TextEditingController();
+  final _devicePublicKeyCtrl = TextEditingController();
   bool _saving = false;
-  bool _showAdvanced = false;
-
-  final _dnsCtrl = TextEditingController(text: '1.1.1.1');
-  final _allowedIpsCtrl = TextEditingController(text: '0.0.0.0/0');
-  final _keepaliveCtrl = TextEditingController(text: '25');
+  bool _generating = false;
+  bool _privateKeyVisible = false;
 
   @override
   void initState() {
@@ -281,23 +278,44 @@ class _VpnSettingsSheetState extends State<_VpnSettingsSheet> {
     setState(() {
       _privateKeyCtrl.text = config.privateKey;
       _addressCtrl.text = config.address;
-      _publicKeyCtrl.text = config.publicKey;
-      _endpointCtrl.text = config.endpoint;
-      _dnsCtrl.text = config.dns;
-      _allowedIpsCtrl.text = config.allowedIps;
-      _keepaliveCtrl.text = config.persistentKeepalive.toString();
+      _devicePublicKeyCtrl.text = config.devicePublicKey;
     });
+  }
+
+  Future<void> _generateKeyPair() async {
+    setState(() => _generating = true);
+    try {
+      final keyPair = await VpnService.instance.generateKeyPair();
+      setState(() {
+        _privateKeyCtrl.text = keyPair.privateKey;
+        _devicePublicKeyCtrl.text = keyPair.publicKey;
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal generate key: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _generating = false);
+    }
+  }
+
+  void _copyDevicePublicKey() {
+    if (_devicePublicKeyCtrl.text.trim().isEmpty) return;
+    Clipboard.setData(ClipboardData(text: _devicePublicKeyCtrl.text));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Public Key disalin. Kirim ke tim IT untuk didaftarkan.'),
+      ),
+    );
   }
 
   @override
   void dispose() {
     _privateKeyCtrl.dispose();
     _addressCtrl.dispose();
-    _publicKeyCtrl.dispose();
-    _endpointCtrl.dispose();
-    _dnsCtrl.dispose();
-    _allowedIpsCtrl.dispose();
-    _keepaliveCtrl.dispose();
+    _devicePublicKeyCtrl.dispose();
     super.dispose();
   }
 
@@ -310,13 +328,7 @@ class _VpnSettingsSheetState extends State<_VpnSettingsSheet> {
         VpnConfigData(
           privateKey: _privateKeyCtrl.text,
           address: _addressCtrl.text,
-          publicKey: _publicKeyCtrl.text,
-          endpoint: _endpointCtrl.text,
-          dns: _dnsCtrl.text.trim().isEmpty ? '1.1.1.1' : _dnsCtrl.text,
-          allowedIps: _allowedIpsCtrl.text.trim().isEmpty
-              ? '0.0.0.0/0'
-              : _allowedIpsCtrl.text,
-          persistentKeepalive: int.tryParse(_keepaliveCtrl.text.trim()) ?? 25,
+          devicePublicKey: _devicePublicKeyCtrl.text,
         ),
       );
       if (mounted) Navigator.of(context).pop(true);
@@ -366,16 +378,80 @@ class _VpnSettingsSheetState extends State<_VpnSettingsSheet> {
                 style: TextStyle(fontSize: 13, color: KColors.onSurfaceVariant),
               ),
               const SizedBox(height: 20),
+
+              // ==== Private Key + toggle show/hide + tombol generate ====
+              // Read-only: private key HARUS hasil generate di device ini,
+              // tidak boleh diketik manual (beda dengan Address).
               TextFormField(
                 controller: _privateKeyCtrl,
-                obscureText: true,
-                decoration: const InputDecoration(
+                readOnly: true,
+                obscureText: !_privateKeyVisible,
+                decoration: InputDecoration(
                   labelText: 'Private Key (device ini)',
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
+                  suffixIcon: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: Icon(
+                          _privateKeyVisible
+                              ? Icons.visibility_off_rounded
+                              : Icons.visibility_rounded,
+                        ),
+                        tooltip: _privateKeyVisible
+                            ? 'Sembunyikan Private Key'
+                            : 'Tampilkan Private Key',
+                        onPressed: () => setState(
+                          () => _privateKeyVisible = !_privateKeyVisible,
+                        ),
+                      ),
+                      _generating
+                          ? const Padding(
+                              padding: EdgeInsets.all(12),
+                              child: SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              ),
+                            )
+                          : IconButton(
+                              icon: const Icon(Icons.refresh_rounded),
+                              tooltip: 'Generate keypair baru di device ini',
+                              onPressed: _generateKeyPair,
+                            ),
+                    ],
+                  ),
                 ),
-                validator: (v) => _required(v, 'Private Key'),
+                validator: (v) =>
+                    _required(v, 'Private Key (tekan tombol refresh dulu)'),
               ),
+              const SizedBox(height: 8),
+              Text(
+                'Tekan tombol refresh untuk generate Private Key + Public Key '
+                'baru langsung di device ini (private key tidak pernah keluar '
+                'dari HP, cuma tersimpan lokal).',
+                style: TextStyle(fontSize: 11.5, color: KColors.onSurfaceVariant),
+              ),
+              if (_devicePublicKeyCtrl.text.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _devicePublicKeyCtrl,
+                  readOnly: true,
+                  decoration: InputDecoration(
+                    labelText: 'Public Key (device ini) — kirim ke tim IT',
+                    border: const OutlineInputBorder(),
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.copy_rounded),
+                      tooltip: 'Salin Public Key',
+                      onPressed: _copyDevicePublicKey,
+                    ),
+                  ),
+                  style: const TextStyle(fontSize: 12.5),
+                ),
+              ],
               const SizedBox(height: 12),
+
+              // ==== Address ====
               TextFormField(
                 controller: _addressCtrl,
                 decoration: const InputDecoration(
@@ -385,59 +461,15 @@ class _VpnSettingsSheetState extends State<_VpnSettingsSheet> {
                 validator: (v) => _required(v, 'Address'),
               ),
               const SizedBox(height: 12),
-              TextFormField(
-                controller: _publicKeyCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Public Key Server',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (v) => _required(v, 'Public Key Server'),
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _endpointCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Endpoint (host:port, mis. vpn.mykfin.com:51820)',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (v) => _required(v, 'Endpoint'),
-              ),
+
               const SizedBox(height: 8),
-              TextButton.icon(
-                onPressed: () => setState(() => _showAdvanced = !_showAdvanced),
-                icon: Icon(
-                  _showAdvanced
-                      ? Icons.expand_less_rounded
-                      : Icons.expand_more_rounded,
-                ),
-                label: const Text('Pengaturan lanjutan'),
+              Text(
+                'Config server (Public Key Server, Endpoint, DNS, dll) sudah '
+                'ditentukan di aplikasi — cukup isi Private Key & Address '
+                'sesuai jatah dari tim IT.',
+                style: TextStyle(fontSize: 11.5, color: KColors.onSurfaceVariant),
               ),
-              if (_showAdvanced) ...[
-                TextFormField(
-                  controller: _dnsCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'DNS',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: _allowedIpsCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Allowed IPs',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: _keepaliveCtrl,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: 'Persistent Keepalive (detik)',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-              ],
+
               const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
