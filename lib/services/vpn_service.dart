@@ -20,23 +20,23 @@ class VpnServerConfig {
   VpnServerConfig._();
 
   /// PublicKey di bagian [Peer] pada file .conf dari IT.
-  static const String publicKey = 'GANTI_DENGAN_PUBLIC_KEY_SERVER';
+  static const String publicKey = 'WybQohqBIBM8dNhI1ry2w0ImjlyktT1diPeHwsJ/1k4=';
 
   /// Endpoint di bagian [Peer], format host:port.
-  static const String endpoint = 'GANTI_DENGAN_ENDPOINT'; // mis. vpn.mykfin.com:51820
+  static const String endpoint = '36.92.192.109:51820'; // mis. vpn.mykfin.com:51820
 
   /// DNS di bagian [Interface].
-  static const String dns = '1.1.1.1';
+  static const String dns = '129.168.1.1';
 
   /// AllowedIPs di bagian [Peer].
-  static const String allowedIps = '0.0.0.0/0';
+  static const String allowedIps = '129.168.0.0/16, 10.6.0.0/24';
 
   /// PersistentKeepalive di bagian [Peer], dalam detik.
   static const int persistentKeepalive = 25;
 
   /// MTU di bagian [Interface]. Isi null kalau IT tidak mencantumkan
   /// baris MTU (WireGuard pakai default 1420 sendiri).
-  static const int mtu = 1420; // ganti sesuai .conf dari IT
+  static const int mtu = 1280; // ganti sesuai .conf dari IT
 }
 
 /// Status koneksi VPN yang dipakai di seluruh UI (VpnGateScreen,
