@@ -44,7 +44,7 @@ class _VpnMenuScreenState extends State<VpnMenuScreen> {
 
   Future<void> _toggle(bool turnOn) async {
     if (turnOn && !_configReady) {
-      _showSnack('Isi Pengaturan VPN dulu sebelum menyambungkan.');
+      _showSnack('Atur VPN terlebih dahulu sebelum menyambungkan.');
       await _openSettings();
       return;
     }
@@ -57,7 +57,9 @@ class _VpnMenuScreenState extends State<VpnMenuScreen> {
         await VpnService.instance.disconnect();
       }
     } catch (e) {
-      _showSnack('Gagal ${turnOn ? "menyambungkan" : "memutuskan"} VPN: $e');
+      _showSnack(
+        'VPN gagal ${turnOn ? "tersambung" : "diputuskan"}. Silakan coba lagi.',
+      );
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -198,7 +200,7 @@ class _VpnMenuScreenState extends State<VpnMenuScreen> {
             _NoticeCard(
               icon: Icons.info_outline_rounded,
               text:
-                  'Konfigurasi VPN belum diisi. Tekan ikon pengaturan di kanan atas untuk mengisi data dari tim IT.',
+                  'VPN belum diatur. Ketuk ikon pengaturan di pojok kanan atas',
               onTap: _openSettings,
             ),
         ],
@@ -306,7 +308,9 @@ class _VpnSettingsSheetState extends State<_VpnSettingsSheet> {
     Clipboard.setData(ClipboardData(text: _devicePublicKeyCtrl.text));
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Public Key disalin. Kirim ke tim IT untuk didaftarkan.'),
+        content: Text(
+          'Kode berhasil disalin. Kirim ke tim IT untuk didaftarkan.',
+        ),
       ),
     );
   }
@@ -344,19 +348,25 @@ class _VpnSettingsSheetState extends State<_VpnSettingsSheet> {
 
   @override
   Widget build(BuildContext context) {
+    // SafeArea(top: false) di bawah otomatis nambah jarak seukuran
+    // navigation bar HP (gesture bar / tombol back-home-recent), jadi
+    // tombol Simpan tidak pernah ketutup terlepas dari model HP-nya.
+    // Padding.only di sini cuma urus jarak kiri/kanan/atas + keyboard.
     return Padding(
       padding: EdgeInsets.only(
         left: 20,
         right: 20,
         top: 16,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+        bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
-      child: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+      child: SafeArea(
+        top: false,
+        child: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
               Center(
                 child: Container(
                   width: 40,
@@ -374,10 +384,10 @@ class _VpnSettingsSheetState extends State<_VpnSettingsSheet> {
               ),
               const SizedBox(height: 4),
               Text(
-                'Isi persis sesuai data / file .conf dari tim IT.',
+                'Private Key',
                 style: TextStyle(fontSize: 13, color: KColors.onSurfaceVariant),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 10),
 
               // ==== Private Key + toggle show/hide + tombol generate ====
               // Read-only: private key HARUS hasil generate di device ini,
@@ -387,7 +397,7 @@ class _VpnSettingsSheetState extends State<_VpnSettingsSheet> {
                 readOnly: true,
                 obscureText: !_privateKeyVisible,
                 decoration: InputDecoration(
-                  labelText: 'Private Key (device ini)',
+                  labelText: 'Kode Keamanan Perangkat (Private Key)',
                   border: const OutlineInputBorder(),
                   suffixIcon: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -399,8 +409,8 @@ class _VpnSettingsSheetState extends State<_VpnSettingsSheet> {
                               : Icons.visibility_rounded,
                         ),
                         tooltip: _privateKeyVisible
-                            ? 'Sembunyikan Private Key'
-                            : 'Tampilkan Private Key',
+                            ? 'Sembunyikan Kode'
+                            : 'Tampilkan Kode',
                         onPressed: () => setState(
                           () => _privateKeyVisible = !_privateKeyVisible,
                         ),
@@ -416,33 +426,31 @@ class _VpnSettingsSheetState extends State<_VpnSettingsSheet> {
                             )
                           : IconButton(
                               icon: const Icon(Icons.refresh_rounded),
-                              tooltip: 'Generate keypair baru di device ini',
+                              tooltip: 'Buat kode baru untuk perangkat ini',
                               onPressed: _generateKeyPair,
                             ),
                     ],
                   ),
                 ),
                 validator: (v) =>
-                    _required(v, 'Private Key (tekan tombol refresh dulu)'),
+                    _required(v, 'Kode Keamanan Perangkat (ketuk tombol refresh dulu)'),
               ),
-              const SizedBox(height: 8),
-              Text(
-                'Tekan tombol refresh untuk generate Private Key + Public Key '
-                'baru langsung di device ini (private key tidak pernah keluar '
-                'dari HP, cuma tersimpan lokal).',
-                style: TextStyle(fontSize: 11.5, color: KColors.onSurfaceVariant),
-              ),
-              if (_devicePublicKeyCtrl.text.isNotEmpty) ...[
+                            if (_devicePublicKeyCtrl.text.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Text(
+                  'Public Key',
+                  style: TextStyle(fontSize: 11.5, color: KColors.onSurfaceVariant),
+                ),
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _devicePublicKeyCtrl,
                   readOnly: true,
                   decoration: InputDecoration(
-                    labelText: 'Public Key (device ini) — kirim ke tim IT',
+                    labelText: 'Kode Publik Perangkat',
                     border: const OutlineInputBorder(),
                     suffixIcon: IconButton(
                       icon: const Icon(Icons.copy_rounded),
-                      tooltip: 'Salin Public Key',
+                      tooltip: 'Salin Kode',
                       onPressed: _copyDevicePublicKey,
                     ),
                   ),
@@ -450,23 +458,27 @@ class _VpnSettingsSheetState extends State<_VpnSettingsSheet> {
                 ),
               ],
               const SizedBox(height: 12),
+             
+              Text(
+                'Address',
+                style: TextStyle(fontSize: 11.5, color: KColors.onSurfaceVariant),
+              ),
+              const SizedBox(height: 10),
 
               // ==== Address ====
               TextFormField(
                 controller: _addressCtrl,
                 decoration: const InputDecoration(
-                  labelText: 'Address (mis. 10.8.0.5/32)',
+                  labelText: 'Alamat VPN (Contoh: 10.8.0.5/32)',
                   border: OutlineInputBorder(),
                 ),
-                validator: (v) => _required(v, 'Address'),
+                validator: (v) => _required(v, 'Alamat VPN'),
               ),
               const SizedBox(height: 12),
 
               const SizedBox(height: 8),
               Text(
-                'Config server (Public Key Server, Endpoint, DNS, dll) sudah '
-                'ditentukan di aplikasi — cukup isi Private Key & Address '
-                'sesuai jatah dari tim IT.',
+                'Ketuk Refresh pada Privat Key yang hanya untuk perangkat anda, setelah itu Copy Public Key dan kirimkan ke tim IT',
                 style: TextStyle(fontSize: 11.5, color: KColors.onSurfaceVariant),
               ),
 
@@ -491,8 +503,12 @@ class _VpnSettingsSheetState extends State<_VpnSettingsSheet> {
                       : const Text('Simpan'),
                 ),
               ),
+              // Jarak ekstra di bawah tombol supaya ada nafas sebelum
+              // SafeArea menambahkan padding navigation bar HP.
+              const SizedBox(height: 32),
             ],
           ),
+        ),
         ),
       ),
     );

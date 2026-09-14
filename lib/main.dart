@@ -164,7 +164,7 @@ class _VpnGateScreenState extends State<VpnGateScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Kalau kamu sedang di luar jaringan kantor, nyalakan VPN dulu supaya bisa akses sistem. Kalau sedang di kantor, VPN tidak perlu dinyalakan — langsung tekan Lanjut.',
+                'Nyalakan hanya jika tidak tersambung jaringan Internet PT. Kirana Food International',
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: 0.85),
                   fontSize: 13,
