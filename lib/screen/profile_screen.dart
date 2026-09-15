@@ -6,11 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'home_screen.dart' show KColors;
-import 'webview_screen.dart';
 import '../services/profile_avatar_service.dart';
 import '../services/access_service.dart';
 import '../services/vpn_service.dart';
 import '../config/app_config.dart';
+import '../main.dart';
 
 /// Halaman Profile — sama untuk semua modul (Menu Utama, Kira Patrol,
 /// dan modul lain nantinya). Data user diambil dari database Laravel
@@ -225,12 +225,44 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() => _loggingOut = true);
 
     try {
+      // Hit endpoint logout dulu SELAGI cookie session masih ada, lewat
+      // WebView tersembunyi (tidak ditampilkan ke user), supaya Laravel
+      // benar-benar menghapus session di sisi server -- bukan cuma
+      // cookie di HP saja yang dibuang.
+      final controller = WebViewController()
+        ..setJavaScriptMode(JavaScriptMode.unrestricted);
+      final pageLoaded = Completer<void>();
+      controller.setNavigationDelegate(
+        NavigationDelegate(
+          onPageFinished: (_) {
+            if (!pageLoaded.isCompleted) pageLoaded.complete();
+          },
+          onWebResourceError: (error) {
+            if (!pageLoaded.isCompleted) {
+              pageLoaded.completeError(error.description);
+            }
+          },
+        ),
+      );
+      await controller.loadRequest(
+        Uri.parse(
+          '${AppConfig.baseUrl}/mobile-logout?_=${DateTime.now().millisecondsSinceEpoch}',
+        ),
+      );
+      await pageLoaded.future.timeout(const Duration(seconds: 5));
+    } catch (_) {
+      // Kalau gagal (mis. tidak ada koneksi / VPN sudah keburu putus),
+      // tetap lanjut -- cookie tetap dihapus di bawah, jadi dari sisi
+      // HP tetap ter-logout walau sesi di server belum sempat dihapus.
+    }
+
+    try {
       // Hapus session cookie WebView supaya login Laravel benar-benar
       // ter-clear, bukan cuma pindah layar.
       await WebViewCookieManager().clearCookies();
     } catch (_) {
-      // Kalau gagal clear cookie, tetap lanjut ke Login supaya user
-      // tidak stuck di halaman Profile.
+      // Kalau gagal clear cookie, tetap lanjut supaya user tidak stuck
+      // di halaman Profile.
     }
 
     // PENTING: AccessService itu singleton yang cache hak akses menu di
@@ -243,32 +275,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     if (!mounted) return;
 
-    // Tidak ada LoginScreen Flutter terpisah — login ditangani langsung
-    // oleh WebView yang me-load form login Laravel. Hit /logout dulu
-    // (route ini bisa diakses langsung via GET) supaya Laravel benar-benar
-    // menghapus session di server, lalu Laravel akan redirect ke halaman
-    // login yang otomatis tampil di WebView yang sama.
+    // Abis logout, balik ke VpnGateScreen dulu (sama seperti alur
+    // pertama kali buka app) -- bukan langsung ke halaman login. Kalau
+    // user sedang di luar jaringan kantor, dia perlu nyalakan VPN lagi
+    // dulu sebelum bisa akses halaman login sama sekali.
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(
-        builder: (context) => WebViewScreen(
-          title: 'Login',
-          // AppBar dimatikan supaya tampilannya persis sama seperti
-          // halaman login pertama kali (main.dart) — full screen tanpa
-          // judul "Login" di atas.
-          showAppBar: false,
-          // Tambahkan timestamp unik (?_= ) supaya URL selalu berbeda
-          // tiap kali logout, WebView jadi tidak mungkin serve halaman
-          // ini dari cache (yang bisa bawa token CSRF basi -> 419).
-          url:
-              '${AppConfig.baseUrl}/mobile-logout?_=${DateTime.now().millisecondsSinceEpoch}',
-          // Abis user login ulang di sini dan Laravel redirect ke
-          // dashboard/menu patrol, pindah ke HomeScreen Flutter (sama
-          // seperti alur login pertama kali di main.dart), jangan
-          // tampilkan dashboard Laravel mentah di dalam WebView ini.
-          redirectHomeWhen: (url) =>
-              url.contains('/dashboard') || url.contains('/patrol/menu'),
-        ),
-      ),
+      MaterialPageRoute(builder: (context) => const VpnGateScreen()),
       (route) => false,
     );
   }
@@ -438,8 +450,14 @@ class _ProfileContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Tinggi system navigation bar beda-beda tiap device (gesture nav vs
+    // 3-button nav, apalagi custom skin kayak MIUI) — ambil dari
+    // MediaQuery supaya tombol Logout di bawah selalu ada jarak aman,
+    // bukan hardcode angka yang cuma pas di sebagian device.
+    final bottomInset = MediaQuery.of(context).padding.bottom;
+
     return ListView(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.fromLTRB(20, 20, 20, 20 + bottomInset + 32),
       children: [
         Center(
           child: Column(

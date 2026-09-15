@@ -4,6 +4,7 @@ import 'package:wireguard_flutter_pro/wireguard_flutter_pro.dart';
 
 import 'vpn_config_service.dart';
 
+import 'package:flutter/services.dart';
 /// Konfigurasi WireGuard milik SERVER kantor — nilainya sama untuk
 /// semua user/device, jadi di-hardcode di sini (bukan diisi manual
 /// tiap user lewat form).
@@ -129,11 +130,50 @@ class VpnService {
     }
   }
 
-  Future<void> disconnect() async {
-    await _ensureInitialized();
+ Future<void> disconnect() async {
+  await _ensureInitialized();
+
+  try {
     await _wireguard.stopVpn();
+    _stateController.add(VpnConnectionState.disconnected);
+    return;
+  } on PlatformException catch (e) {
+    final isTunnelNotRunning =
+        (e.message ?? '').toLowerCase().contains('tunnel is not running');
+    if (!isTunnelNotRunning) rethrow;
   }
 
+  // Plugin tidak punya pegangan ke tunnel (biasanya karena app sempat
+  // di-restart saat VPN masih nyala). Sambungkan ulang dulu -- ini
+  // otomatis "mengambil alih" tunnel lama yang nyangkut, karena Android
+  // cuma izinkan 1 VPN aktif se-sistem -- baru langsung diputuskan lagi
+  // dengan pegangan yang sekarang valid.
+  final config = await VpnConfigService.instance.load();
+  if (config != null) {
+    try {
+      await _wireguard.startVpn(
+        serverAddress: config.serverAddress,
+        wgQuickConfig: config.toWgQuickConfig(),
+        providerBundleIdentifier: _providerBundleIdentifier,
+      );
+      await Future.delayed(const Duration(milliseconds: 800));
+      await _wireguard.stopVpn();
+      _stateController.add(VpnConnectionState.disconnected);
+      return;
+    } catch (_) {
+      // lanjut ke penanganan gagal di bawah
+    }
+  }
+
+  // Benar-benar tidak berhasil diputuskan dari app. JANGAN bohongi
+  // status jadi "terputus" -- tetap tampilkan sebagai tersambung, dan
+  // kasih tahu user cara matikan manual.
+  _stateController.add(VpnConnectionState.connected);
+  throw StateError(
+    'VPN tidak bisa diputuskan otomatis. Matikan manual lewat '
+    'Settings > Network > VPN di HP.',
+  );
+}
   /// Generate keypair WireGuard (X25519) langsung di device lewat
   /// fungsi native package wireguard_flutter_pro — private key tidak
   /// pernah keluar dari HP, cuma public key yang perlu dikirim ke tim

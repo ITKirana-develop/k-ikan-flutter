@@ -353,12 +353,12 @@ class _VpnSettingsSheetState extends State<_VpnSettingsSheet> {
     // tombol Simpan tidak pernah ketutup terlepas dari model HP-nya.
     // Padding.only di sini cuma urus jarak kiri/kanan/atas + keyboard.
     return Padding(
-      padding: EdgeInsets.only(
-        left: 20,
-        right: 20,
-        top: 16,
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-      ),
+  padding: EdgeInsets.only(
+    left: 20,
+    right: 20,
+    top: 16,
+    bottom: MediaQuery.of(context).viewInsets.bottom + 12,
+  ),
       child: SafeArea(
         top: false,
         child: Form(
@@ -505,7 +505,7 @@ class _VpnSettingsSheetState extends State<_VpnSettingsSheet> {
               ),
               // Jarak ekstra di bawah tombol supaya ada nafas sebelum
               // SafeArea menambahkan padding navigation bar HP.
-              const SizedBox(height: 32),
+              const SizedBox(height: 45),
             ],
           ),
         ),
