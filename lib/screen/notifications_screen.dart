@@ -20,7 +20,7 @@ import '../config/app_config.dart';
 /// entri baru di [_items] dengan `module: 'asset_management'` dan
 /// `menuKeys: [...]` sesuai key di accessible_menus — otomatis kefilter
 /// sendiri di kedua tempat tanpa ubah kode lain.
-class NotificationsScreen extends StatelessWidget {
+class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key, this.moduleScope});
 
   final String? moduleScope;
@@ -93,10 +93,24 @@ class NotificationsScreen extends StatelessWidget {
   ];
 
   @override
+  State<NotificationsScreen> createState() => _NotificationsScreenState();
+}
+
+class _NotificationsScreenState extends State<NotificationsScreen> {
+  Future<void> _refresh() async {
+    // Muat ulang hak akses dari server (mis. kalau admin baru saja
+    // mengubah menu yang bisa diakses user ini), lalu build ulang
+    // daftar notifikasi berdasarkan hasil terbaru.
+    await AccessService.instance.load(forceRefresh: true);
+    if (mounted) setState(() {});
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final moduleScope = widget.moduleScope;
     final access = AccessService.instance;
 
-    final items = _items
+    final items = NotificationsScreen._items
         .where((e) => moduleScope == null || e.module == moduleScope)
         .where((e) => access.hasAnyMenu(e.menuKeys))
         .toList();
@@ -136,36 +150,46 @@ class NotificationsScreen extends StatelessWidget {
             colors: [KColors.surfaceContainerHigh.withValues(alpha: 0.5), KColors.surface],
           ),
         ),
-        child: items.isEmpty
-            ? Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 64,
-                      height: 64,
-                      decoration: BoxDecoration(
-                        color: KColors.primary.withValues(alpha: 0.08),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.notifications_off_rounded,
-                        color: KColors.primary.withValues(alpha: 0.5),
-                        size: 28,
-                      ),
+        child: RefreshIndicator(
+          color: KColors.primary,
+          onRefresh: _refresh,
+          child: items.isEmpty
+            ? SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.7,
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 64,
+                          height: 64,
+                          decoration: BoxDecoration(
+                            color: KColors.primary.withValues(alpha: 0.08),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.notifications_off_rounded,
+                            color: KColors.primary.withValues(alpha: 0.5),
+                            size: 28,
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        Text(
+                          'Belum ada notifikasi',
+                          style: TextStyle(
+                            color: KColors.onSurfaceVariant,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 14),
-                    Text(
-                      'Belum ada notifikasi',
-                      style: TextStyle(
-                        color: KColors.onSurfaceVariant,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               )
             : ListView.separated(
+                physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.all(16),
                 itemCount: items.length,
                 separatorBuilder: (_, _) => const SizedBox(height: 12),
@@ -190,6 +214,7 @@ class NotificationsScreen extends StatelessWidget {
                   );
                 },
               ),
+        ),
       ),
     );
   }

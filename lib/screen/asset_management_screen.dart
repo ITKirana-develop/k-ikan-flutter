@@ -5,8 +5,21 @@ import 'module_bottom_nav.dart';
 import '../config/app_config.dart';
 import '../services/access_service.dart';
 
-class AssetManagementScreen extends StatelessWidget {
+class AssetManagementScreen extends StatefulWidget {
   const AssetManagementScreen({super.key});
+
+  @override
+  State<AssetManagementScreen> createState() => _AssetManagementScreenState();
+}
+
+class _AssetManagementScreenState extends State<AssetManagementScreen> {
+  Future<void> _refresh() async {
+    // Muat ulang hak akses dari server (mis. kalau admin baru saja
+    // mengubah menu yang bisa diakses user ini), lalu build ulang
+    // kartu-kartu menu berdasarkan hasil terbaru.
+    await AccessService.instance.load(forceRefresh: true);
+    if (mounted) setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -145,8 +158,12 @@ class AssetManagementScreen extends StatelessWidget {
       backgroundColor: KColors.surface,
       body: SafeArea(
         bottom: false,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.only(bottom: 24),
+        child: RefreshIndicator(
+          color: KColors.primary,
+          onRefresh: _refresh,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.only(bottom: 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -174,6 +191,7 @@ class AssetManagementScreen extends StatelessWidget {
               ],
             ],
           ),
+        ),
         ),
       ),
       bottomNavigationBar: const ModuleBottomNavBar(

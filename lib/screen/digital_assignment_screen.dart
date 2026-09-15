@@ -5,8 +5,21 @@ import 'module_bottom_nav.dart';
 import '../config/app_config.dart';
 import '../services/access_service.dart';
 
-class DigitalAssignmentScreen extends StatelessWidget {
+class DigitalAssignmentScreen extends StatefulWidget {
   const DigitalAssignmentScreen({super.key});
+
+  @override
+  State<DigitalAssignmentScreen> createState() => _DigitalAssignmentScreenState();
+}
+
+class _DigitalAssignmentScreenState extends State<DigitalAssignmentScreen> {
+  Future<void> _refresh() async {
+    // Muat ulang hak akses dari server (mis. kalau admin baru saja
+    // mengubah menu yang bisa diakses user ini), lalu build ulang
+    // kartu-kartu menu berdasarkan hasil terbaru.
+    await AccessService.instance.load(forceRefresh: true);
+    if (mounted) setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -78,8 +91,12 @@ class DigitalAssignmentScreen extends StatelessWidget {
       backgroundColor: KColors.surface,
       body: SafeArea(
         bottom: false,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.only(bottom: 24),
+        child: RefreshIndicator(
+          color: KColors.primary,
+          onRefresh: _refresh,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.only(bottom: 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -107,6 +124,7 @@ class DigitalAssignmentScreen extends StatelessWidget {
               ],
             ],
           ),
+        ),
         ),
       ),
       bottomNavigationBar: const ModuleBottomNavBar(

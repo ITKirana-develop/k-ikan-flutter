@@ -3,9 +3,23 @@ import 'home_screen.dart' show KColors;
 import 'webview_screen.dart';
 import 'module_bottom_nav.dart';
 import '../config/app_config.dart';
+import '../services/access_service.dart';
 
-class MasterScreen extends StatelessWidget {
+class MasterScreen extends StatefulWidget {
   const MasterScreen({super.key});
+
+  @override
+  State<MasterScreen> createState() => _MasterScreenState();
+}
+
+class _MasterScreenState extends State<MasterScreen> {
+  Future<void> _refresh() async {
+    // Muat ulang hak akses dari server (mis. kalau admin baru saja
+    // mengubah menu yang bisa diakses user ini), lalu build ulang
+    // kartu-kartu menu berdasarkan hasil terbaru.
+    await AccessService.instance.load(forceRefresh: true);
+    if (mounted) setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -13,8 +27,12 @@ class MasterScreen extends StatelessWidget {
       backgroundColor: KColors.surface,
       body: SafeArea(
         bottom: false,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.only(bottom: 24),
+        child: RefreshIndicator(
+          color: KColors.primary,
+          onRefresh: _refresh,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.only(bottom: 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -109,6 +127,7 @@ class MasterScreen extends StatelessWidget {
               ),
             ],
           ),
+        ),
         ),
       ),
       bottomNavigationBar: const ModuleBottomNavBar(

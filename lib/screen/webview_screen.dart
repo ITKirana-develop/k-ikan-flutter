@@ -1,6 +1,8 @@
 import 'dart:io';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show Factory;
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:open_filex/open_filex.dart';
@@ -55,6 +57,21 @@ class _WebViewScreenState extends State<WebViewScreen> {
   int loadingProgress = 0;
   bool hasError = false;
 
+  // ==== State untuk pull-to-refresh (geser dari atas) ====
+  // WebView bukan widget scroll biasa di Flutter (dia native view
+  // terpisah), jadi RefreshIndicator bawaan Flutter tidak otomatis
+  // bisa mendeteksi swipe di dalamnya. _webViewAtTop dipakai supaya
+  // gesture geser cuma dianggap "mau refresh" kalau halaman web-nya
+  // memang sedang di posisi paling atas (bukan pas user lagi scroll
+  // biasa di tengah halaman) -- nilainya diupdate lewat JavaScript
+  // channel _ScrollTracker di bawah.
+  bool _webViewAtTop = true;
+  double _pullDistance = 0;
+  bool _refreshing = false;
+
+  static const double _pullTriggerThreshold = 72;
+  static const double _pullMaxDistance = 110;
+
   @override
   void initState() {
     super.initState();
@@ -66,6 +83,20 @@ class _WebViewScreenState extends State<WebViewScreen> {
 
     controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      // Channel buat lacak posisi scroll halaman web, dipakai supaya
+      // gesture pull-to-refresh cuma aktif kalau halaman sedang di
+      // paling atas. Halaman web tidak perlu diubah kodenya -- script
+      // pelacaknya di-inject otomatis lewat onPageStarted di bawah.
+      ..addJavaScriptChannel(
+        'FlutterScrollTracker',
+        onMessageReceived: (message) {
+          if (!mounted) return;
+          final atTop = message.message == 'top';
+          if (atTop != _webViewAtTop) {
+            setState(() => _webViewAtTop = atTop);
+          }
+        },
+      )
       ..setNavigationDelegate(
         NavigationDelegate(
           onPageStarted: (url) {
@@ -73,6 +104,7 @@ class _WebViewScreenState extends State<WebViewScreen> {
               isLoading = true;
               hasError = false;
               loadingProgress = 0;
+              _webViewAtTop = true;
             });
           },
 
@@ -88,6 +120,23 @@ class _WebViewScreenState extends State<WebViewScreen> {
             setState(() {
               isLoading = false;
             });
+
+            // Pasang listener scroll di halaman web, laporkan tiap
+            // kali posisi scroll berubah lewat FlutterScrollTracker.
+            // window.__ktFlutterScrollBound dipakai supaya listener
+            // tidak dobel-terpasang kalau onPageFinished sempat
+            // terpanggil lebih dari sekali untuk halaman yang sama.
+            controller.runJavaScript('''
+              if (!window.__ktFlutterScrollBound) {
+                window.__ktFlutterScrollBound = true;
+                var reportScroll = function() {
+                  var atTop = (window.scrollY || document.documentElement.scrollTop || 0) <= 0;
+                  FlutterScrollTracker.postMessage(atTop ? 'top' : 'nottop');
+                };
+                window.addEventListener('scroll', reportScroll, { passive: true });
+                reportScroll();
+              }
+            ''');
 
             // Auto-close: dipakai misalnya oleh Lapor Darurat, supaya
             // begitu Laravel redirect balik ke Menu Ramah HP setelah
@@ -431,6 +480,86 @@ class _WebViewScreenState extends State<WebViewScreen> {
     controller.reload();
   }
 
+  // ==== Pull-to-refresh (geser dari atas) ====
+
+  void _onPullDragUpdate(DragUpdateDetails details) {
+    // Cuma boleh mulai "menarik" kalau: halaman web di posisi paling
+    // atas, arah geser ke BAWAH (delta positif), dan bukan lagi
+    // proses refresh yang sebelumnya.
+    if (!_webViewAtTop || _refreshing || hasError) return;
+    if (details.delta.dy <= 0 && _pullDistance <= 0) return;
+
+    setState(() {
+      _pullDistance = (_pullDistance + details.delta.dy * 0.55)
+          .clamp(0, _pullMaxDistance);
+    });
+  }
+
+  Future<void> _onPullDragEnd(DragEndDetails details) async {
+    if (_pullDistance >= _pullTriggerThreshold && !_refreshing) {
+      setState(() => _refreshing = true);
+      controller.reload();
+      // Beri jeda sebentar biar animasi loading kelihatan menyatu
+      // dengan proses reload yang sebenarnya (onPageStarted/onPageFinished
+      // di atas yang akan urus status isLoading selanjutnya).
+      await Future.delayed(const Duration(milliseconds: 500));
+      if (!mounted) return;
+      setState(() {
+        _refreshing = false;
+        _pullDistance = 0;
+      });
+    } else {
+      setState(() => _pullDistance = 0);
+    }
+  }
+
+  Widget _buildPullToRefreshIndicator() {
+    final progress = (_pullDistance / _pullTriggerThreshold).clamp(0.0, 1.0);
+    return Positioned(
+      top: 10,
+      left: 0,
+      right: 0,
+      child: Center(
+        child: Opacity(
+          opacity: progress,
+          child: Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: KColors.surfaceContainerLowest,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: KColors.onSurface.withValues(alpha: 0.08),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: _refreshing
+                ? Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.4,
+                      color: KColors.primary,
+                    ),
+                  )
+                : Transform.rotate(
+                    angle: progress * 3.14,
+                    child: Icon(
+                      Icons.arrow_downward_rounded,
+                      size: 18,
+                      color: progress >= 1
+                          ? KColors.primary
+                          : KColors.onSurfaceVariant,
+                    ),
+                  ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildLoadingOverlay() {
     return Container(
       color: KColors.surface,
@@ -572,24 +701,33 @@ class _WebViewScreenState extends State<WebViewScreen> {
             ? AppBar(
                 title: Text(widget.title),
                 automaticallyImplyLeading: false,
-                actions: [
-                  IconButton(
-                    icon: const Icon(Icons.refresh_rounded),
-                    tooltip: 'Refresh',
-                    onPressed: () {
-                      controller.reload();
-                    },
-                  ),
-                ],
               )
             : null,
         body: SafeArea(
           top: !widget.showAppBar,
           child: Stack(
           children: [
-            WebViewWidget(
-              controller: controller,
+            GestureDetector(
+              onVerticalDragUpdate: _onPullDragUpdate,
+              onVerticalDragEnd: _onPullDragEnd,
+              child: Transform.translate(
+                offset: Offset(0, _pullDistance),
+                child: WebViewWidget(
+                  controller: controller,
+                  // gestureRecognizers ini yang bikin gesture geser bisa
+                  // "kedengaran" juga sama GestureDetector di atas,
+                  // meskipun jari user lagi nyentuh area WebView (yang
+                  // biasanya WebView native "monopoli" semua sentuhan).
+                  gestureRecognizers: {
+                    Factory<VerticalDragGestureRecognizer>(
+                      () => VerticalDragGestureRecognizer(),
+                    ),
+                  },
+                ),
+              ),
             ),
+
+            if (_pullDistance > 0) _buildPullToRefreshIndicator(),
 
             if (isLoading && !hasError)
               AnimatedOpacity(

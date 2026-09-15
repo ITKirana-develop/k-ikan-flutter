@@ -88,14 +88,14 @@ class _HomeScreenState extends State<HomeScreen> {
     if (mounted) setState(() {});
   }
 
-  Future<void> _loadAccess() async {
-    await AccessService.instance.load();
-    // Load foto per-username SETELAH access selesai fetch, supaya
-    // username-nya sudah kebaca dari response yang sama (tidak perlu
-    // request terpisah lagi).
-    await ProfileAvatarService.instance.load(AccessService.instance.username);
-    if (mounted) setState(() {});
-  }
+  Future<void> _loadAccess({bool forceRefresh = false}) async {
+  await AccessService.instance.load(forceRefresh: forceRefresh);
+  // Load foto per-username SETELAH access selesai fetch, supaya
+  // username-nya sudah kebaca dari response yang sama (tidak perlu
+  // request terpisah lagi).
+  await ProfileAvatarService.instance.load(AccessService.instance.username);
+  if (mounted) setState(() {});
+}
 
   String _greeting() {
     final hour = DateTime.now().hour;
@@ -140,11 +140,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       backgroundColor: KColors.surface,
-      body: SafeArea(
+            body: SafeArea(
         bottom: false,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.only(bottom: 24),
-          child: Column(
+        child: RefreshIndicator(
+          color: KColors.primary,
+          onRefresh: () => _loadAccess(forceRefresh: true),
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.only(bottom: 24),
+            child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _HeroHeader(
@@ -278,7 +282,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             builder: (context) => const MasterScreen(),
                           ));
                         },
-                      ),
+                      ), 
                   ],
                 ),
               ),
@@ -286,6 +290,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
+            ),
       bottomNavigationBar: const _KBottomNavBar(),
     );
   }

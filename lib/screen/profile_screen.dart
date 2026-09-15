@@ -133,11 +133,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     await ProfileAvatarService.instance.setPhoto(File(file.path), username);
   }
 
-  Future<void> _fetchProfile() async {
+  Future<void> _fetchProfile({bool showLoading = true}) async {
+  if (showLoading) {
     setState(() {
       _loading = true;
       _error = null;
     });
+  }
 
     try {
       final controller = WebViewController()
@@ -177,10 +179,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       final data = jsonDecode(jsonText) as Map<String, dynamic>;
 
-      if (!mounted) return;
+       if (!mounted) return;
       setState(() {
         _profile = data;
         _loading = false;
+        _error = null;
       });
 
       final username = data['username'] as String? ?? '';
@@ -329,7 +332,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
       ),
-      body: DecoratedBox(
+            body: DecoratedBox(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
@@ -345,16 +348,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ? const Center(child: CircularProgressIndicator())
             : _error != null
             ? _ErrorState(message: _error!, onRetry: _fetchProfile)
-            : _ProfileContent(
-                profile: _profile!,
-                initials: _initials(_profile!['full_name'] as String?),
-                roleLabel: _roleLabel(_profile!['role'] as String?),
-                loggingOut: _loggingOut,
-                onLogout: _confirmLogout,
-                photoFile: ProfileAvatarService.instance.photoFile,
-                onEditPhoto: _pickPhoto,
-                vpnState: _vpnState,
-                onVpnToggle: _onVpnToggle,
+            : RefreshIndicator(
+                color: KColors.primary,
+                onRefresh: () => _fetchProfile(showLoading: false),
+                child: _ProfileContent(
+                  profile: _profile!,
+                  initials: _initials(_profile!['full_name'] as String?),
+                  roleLabel: _roleLabel(_profile!['role'] as String?),
+                  loggingOut: _loggingOut,
+                  onLogout: _confirmLogout,
+                  photoFile: ProfileAvatarService.instance.photoFile,
+                  onEditPhoto: _pickPhoto,
+                  vpnState: _vpnState,
+                  onVpnToggle: _onVpnToggle,
+                ),
               ),
       ),
     );
@@ -456,7 +463,8 @@ class _ProfileContent extends StatelessWidget {
     // bukan hardcode angka yang cuma pas di sebagian device.
     final bottomInset = MediaQuery.of(context).padding.bottom;
 
-    return ListView(
+        return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: EdgeInsets.fromLTRB(20, 20, 20, 20 + bottomInset + 32),
       children: [
         Center(
